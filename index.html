@@ -107,6 +107,7 @@
       transition: background 0.15s;
     }
     button:hover { background: #1444b3; }
+    button:disabled { background: #93aee8; cursor: default; }
 
     .output-area {
       border: 1px solid #e0e0e0;
@@ -125,7 +126,7 @@
     .output-area.error { color: #f38ba8; }
     .output-area.empty { color: #6c7086; font-style: italic; }
 
-    /* ─── Zest demo: sample DOM ─── */
+    /* ─── Zest demo: live Wikipedia DOM ─── */
     .sample-dom {
       border: 1px solid #e0e0e0;
       border-radius: 5px;
@@ -133,11 +134,8 @@
       background: #fafafa;
       font-size: 0.85rem;
       line-height: 1.8;
-    }
-    .sample-dom article {
-      border-left: 3px solid #ddd;
-      padding-left: 0.75rem;
-      margin: 0.4rem 0;
+      max-height: 400px;
+      overflow-y: auto;
     }
     .sample-dom .zest-highlight {
       background: #fff3cd;
@@ -151,6 +149,45 @@
     }
     .match-count.none { color: #888; }
 
+    .fetch-status {
+      font-size: 0.8rem;
+      color: #555;
+      min-height: 1.2em;
+    }
+    .fetch-status.error { color: #c0392b; }
+
+    .transfer-notice {
+      font-size: 0.8rem;
+      background: #e6f4ea;
+      border: 1px solid #a8d5b5;
+      border-radius: 4px;
+      padding: 5px 10px;
+      color: #1e5e35;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .transfer-notice button {
+      background: none;
+      color: #1e5e35;
+      font-size: 1rem;
+      padding: 0 4px;
+      line-height: 1;
+      align-self: auto;
+    }
+    .transfer-notice button:hover { background: rgba(0,0,0,0.08); }
+
+    .example-group { display: flex; flex-direction: column; gap: 4px; }
+    .example-group-label {
+      font-size: 0.72rem;
+      color: #888;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .example-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
     .row { display: flex; gap: 0.5rem; align-items: flex-end; }
     .row input { flex: 1; }
   </style>
@@ -160,8 +197,9 @@
 <h1>zest + zestjq Demo</h1>
 <p class="subtitle">
   Client-side demos of
-  <a href="https://github.com/chjj/zest" target="_blank">zest</a> (CSS selector engine) and
-  <a href="https://www.mediawiki.org/wiki/ZestJQ" target="_blank">zestjq</a> (jq JSON-filter language).
+  <a href="https://github.com/cscott/zest" target="_blank">zest</a> (CSS selector engine) and
+  <a href="https://www.mediawiki.org/wiki/ZestJQ" target="_blank">zestjq</a> (jq JSON-filter language),
+  integrated to query JSON-valued attributes in live Wikipedia articles.
 </p>
 
 <div class="cards">
@@ -175,7 +213,8 @@
     <p class="card-desc">
       A native TypeScript/JavaScript implementation of the
       <a href="https://jqlang.org/" target="_blank">jq</a>
-      JSON query language — runs entirely in the browser.
+      JSON query language. Run jq filters against the <code>data-mw</code>
+      attribute of any matched element — or supply your own JSON.
     </p>
 
     <div>
@@ -212,7 +251,15 @@
 
     <div>
       <label>Try these filters</label>
-      <div id="jq-examples" style="display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.8rem;">
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="example-group" id="jq-mw-group">
+          <div class="example-group-label">MediaWiki data-mw (after match)</div>
+          <div class="example-buttons" id="jq-mw-examples"></div>
+        </div>
+        <div class="example-group">
+          <div class="example-group-label">Bookstore (default)</div>
+          <div class="example-buttons" id="jq-examples"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -221,61 +268,57 @@
   <div class="card">
     <div class="card-title">
       Zest
-      <span class="badge">npm install zest</span>
+      <span class="badge">github:cscott/zest</span>
     </div>
     <p class="card-desc">
-      A fast, lightweight CSS selector engine — an alternative to
-      <code>document.querySelectorAll</code> with support for CSS3/CSS4 selectors.
+      A fast CSS selector engine extended with a <code>[attr/<em>jq</em>]</code> operator
+      that evaluates jq expressions against JSON-valued attributes —
+      ideal for querying <a href="https://www.mediawiki.org/wiki/Specs/HTML" target="_blank">MediaWiki Parsoid HTML</a>.
     </p>
 
+    <div class="row">
+      <div style="flex:1">
+        <label for="wiki-title">Wikipedia Page</label>
+        <input type="text" id="wiki-title" value="JSON" placeholder="Page title">
+      </div>
+      <button id="wiki-fetch">Fetch</button>
+    </div>
+    <div id="fetch-status" class="fetch-status"></div>
+
     <div>
-      <label>Sample Document</label>
+      <label>Live Document</label>
       <div class="sample-dom" id="sample-dom">
-        <nav>
-          <a href="#" class="nav-link active">Home</a>
-          <a href="#" class="nav-link">About</a>
-          <a href="#" class="nav-link">Contact</a>
-        </nav>
-        <article class="post featured" data-id="1" data-mw='{"a":2}'>
-          <h2>Introduction to CSS Selectors</h2>
-          <p class="summary">Learn how CSS selectors work.</p>
-          <ul>
-            <li class="tag">css</li>
-            <li class="tag">tutorial</li>
-          </ul>
-        </article>
-        <article class="post" data-id="2">
-          <h2>Advanced jq Queries</h2>
-          <p class="summary">Deep dive into jq filter syntax.</p>
-          <ul>
-            <li class="tag">jq</li>
-            <li class="tag">json</li>
-          </ul>
-        </article>
-        <article class="post" data-id="3">
-          <h2>JavaScript DOM APIs</h2>
-          <p class="summary">Native DOM manipulation patterns.</p>
-          <ul>
-            <li class="tag">javascript</li>
-          </ul>
-        </article>
+        <em style="color:#aaa">Fetching Wikipedia article…</em>
       </div>
     </div>
 
     <div class="row">
       <div style="flex:1">
         <label for="css-selector">CSS Selector</label>
-        <input type="text" id="css-selector" value="[data-mw/.a < 3]">
+        <input type="text" id="css-selector" value="[typeof~=&quot;mw:Transclusion&quot;]">
       </div>
       <button id="css-run">Find</button>
     </div>
 
-    <div id="css-match-count" class="match-count none">Enter a selector and click Find.</div>
+    <div id="css-match-count" class="match-count none">Fetch a page and enter a selector.</div>
 
     <div>
       <label>Try these selectors</label>
-      <div id="css-examples" style="display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.8rem;">
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="example-group">
+          <div class="example-group-label">MediaWiki attributes</div>
+          <div class="example-buttons" id="css-basic-examples"></div>
+        </div>
+        <div class="example-group">
+          <div class="example-group-label">data-mw / jq (&#x2F; operator)</div>
+          <div class="example-buttons" id="css-jq-examples"></div>
+        </div>
       </div>
+    </div>
+
+    <div id="transfer-notice" style="display:none" class="transfer-notice">
+      <span id="transfer-text"></span>
+      <button id="transfer-dismiss" title="Dismiss">&#x00D7;</button>
     </div>
 
     <div>
@@ -292,10 +335,35 @@
 <script src="zestjq.js"></script>
 
 <script>
+// ── Shared helper ──────────────────────────────────────────────────────
+function makeExampleButton(label) {
+  const btn = document.createElement('button');
+  btn.textContent = label;
+  btn.style.cssText = 'background:#f0f4ff;color:#1a56db;border:1px solid #bdd0fb;font-family:monospace;font-size:0.78rem;padding:3px 8px;border-radius:4px;cursor:pointer;align-self:auto;';
+  return btn;
+}
+
+function renderExamples(container, examples, clickFn) {
+  container.innerHTML = '';
+  examples.forEach(ex => {
+    const btn = makeExampleButton(ex);
+    btn.addEventListener('click', () => clickFn(ex));
+    container.appendChild(btn);
+  });
+}
+
+
 // ── ZestJQ playground ──────────────────────────────────────────────────
 const { JQ, JQError } = ZestJQ;
 
-const jqExamples = [
+const jqMwExamples = [
+  '.parts[].template?.target.href',
+  '[.parts[].template?.params // empty]',
+  '.parts | length',
+  '.parts[] | select(.parserfunction?)',
+];
+
+const jqBookstoreExamples = [
   '.store.book[].title',
   '.store.book[] | select(.price < 10)',
   '[.store.book[] | select(has("isbn"))]',
@@ -304,17 +372,11 @@ const jqExamples = [
   '.store.book | map({title, price}) | sort_by(.price)',
 ];
 
-function renderExamples(container, examples, clickFn) {
-  examples.forEach(ex => {
-    const btn = document.createElement('button');
-    btn.textContent = ex;
-    btn.style.cssText = 'background:#f0f4ff;color:#1a56db;border:1px solid #bdd0fb;font-family:monospace;font-size:0.78rem;padding:3px 8px;border-radius:4px;cursor:pointer;';
-    btn.addEventListener('click', () => clickFn(ex));
-    container.appendChild(btn);
-  });
-}
-
-renderExamples(document.getElementById('jq-examples'), jqExamples, ex => {
+renderExamples(document.getElementById('jq-mw-examples'), jqMwExamples, ex => {
+  document.getElementById('jq-filter').value = ex;
+  runJQ();
+});
+renderExamples(document.getElementById('jq-examples'), jqBookstoreExamples, ex => {
   document.getElementById('jq-filter').value = ex;
   runJQ();
 });
@@ -356,29 +418,88 @@ document.getElementById('jq-filter').addEventListener('keydown', e => {
   if (e.key === 'Enter') runJQ();
 });
 
-// Run with default filter on load
 runJQ();
 
 
+// ── Wikipedia fetch ────────────────────────────────────────────────────
+const sampleDom = document.getElementById('sample-dom');
+const fetchStatus = document.getElementById('fetch-status');
+const fetchBtn = document.getElementById('wiki-fetch');
+
+async function fetchWikipedia(title) {
+  fetchStatus.className = 'fetch-status';
+  fetchStatus.textContent = 'Fetching…';
+  fetchBtn.disabled = true;
+  sampleDom.innerHTML = '<em style="color:#aaa">Loading…</em>';
+  clearHighlights();
+
+  try {
+    const url = 'https://en.wikipedia.org/w/api.php?action=parse&format=json&origin=*' +
+      '&page=' + encodeURIComponent(title) + '&parser=parsoid&formatversion=2';
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (data.error) {
+      fetchStatus.className = 'fetch-status error';
+      fetchStatus.textContent = 'Error: ' + data.error.info;
+      sampleDom.innerHTML = '';
+      return;
+    }
+
+    sampleDom.innerHTML = data.parse.text;
+    sampleDom.scrollTop = 0;
+
+    const transclusions = zest('[typeof~="mw:Transclusion"]', sampleDom);
+    const kb = (new Blob([data.parse.text]).size / 1024).toFixed(0);
+    fetchStatus.textContent =
+      'Fetched ⟦⟦' + data.parse.title + '⟧⟧' +
+      ' (' + kb + ' kB, ' + transclusions.length +
+      ' transclusion' + (transclusions.length !== 1 ? 's' : '') + ')';
+
+    // Re-run selector if one is set
+    const sel = document.getElementById('css-selector').value.trim();
+    if (sel) runCSS();
+
+  } catch (e) {
+    fetchStatus.className = 'fetch-status error';
+    fetchStatus.textContent = 'Network error: ' + e.message;
+    sampleDom.innerHTML = '';
+  } finally {
+    fetchBtn.disabled = false;
+  }
+}
+
+fetchBtn.addEventListener('click', () => {
+  fetchWikipedia(document.getElementById('wiki-title').value.trim() || 'Main Page');
+});
+document.getElementById('wiki-title').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fetchBtn.click();
+});
+
+
 // ── Zest CSS selector demo ─────────────────────────────────────────────
-const cssExamples = [
-  'article.post',
-  'article.featured',
-  '.tag',
-  'a.nav-link',
-  'a.nav-link.active',
-  'article[data-id="2"]',
-  'h2',
-  '.post p.summary',
-  ':first-child',
+const cssBasicExamples = [
+  '[data-mw]',
+  '[typeof~="mw:Transclusion"]',
+  '[typeof~="mw:Entity"]',
+  'a[rel~="mw:WikiLink"]',
 ];
 
-renderExamples(document.getElementById('css-examples'), cssExamples, ex => {
+const cssJqExamples = [
+  '[data-mw/.parts[].template?]',
+  '[data-mw/.parts[].parserfunction?]',
+  '[data-mw/.parts | length > 1]',
+  '[data-mw/.parts[].template?.target.href == "./Template:Citation_needed"]',
+];
+
+renderExamples(document.getElementById('css-basic-examples'), cssBasicExamples, ex => {
   document.getElementById('css-selector').value = ex;
   runCSS();
 });
-
-const sampleDom = document.getElementById('sample-dom');
+renderExamples(document.getElementById('css-jq-examples'), cssJqExamples, ex => {
+  document.getElementById('css-selector').value = ex;
+  runCSS();
+});
 
 function clearHighlights() {
   sampleDom.querySelectorAll('.zest-highlight').forEach(el => {
@@ -388,19 +509,29 @@ function clearHighlights() {
 
 function serializeElement(el) {
   const attrs = Array.from(el.attributes)
-    .filter(a => a.name !== 'class' || el.className.replace('zest-highlight', '').trim())
     .map(a => {
       const val = a.name === 'class'
         ? a.value.replace(/\bzest-highlight\b/g, '').trim()
         : a.value;
-      return val ? `${a.name}="${val}"` : a.name;
+      if (!val) return a.name;
+      // truncate long attribute values
+      const display = val.length > 60 ? val.slice(0, 57) + '…' : val;
+      return a.name + '="' + display + '"';
     })
     .filter(Boolean)
     .join(' ');
   const tag = el.tagName.toLowerCase();
   const inner = el.textContent.trim().slice(0, 60);
-  return `<${tag}${attrs ? ' ' + attrs : ''}>${inner ? inner + (inner.length >= 60 ? '…' : '') : '…'}</${tag}>`;
+  return '<' + tag + (attrs ? ' ' + attrs : '') + '>'
+    + (inner ? inner + (el.textContent.trim().length > 60 ? '…' : '') : '…')
+    + '</' + tag + '>';
 }
+
+const transferNotice = document.getElementById('transfer-notice');
+const transferText = document.getElementById('transfer-text');
+document.getElementById('transfer-dismiss').addEventListener('click', () => {
+  transferNotice.style.display = 'none';
+});
 
 function runCSS() {
   clearHighlights();
@@ -414,6 +545,7 @@ function runCSS() {
     countEl.textContent = 'Enter a selector and click Find.';
     out.className = 'output-area empty';
     out.textContent = 'Results will appear here.';
+    transferNotice.style.display = 'none';
     return;
   }
 
@@ -425,6 +557,7 @@ function runCSS() {
     countEl.textContent = '';
     out.className = 'output-area error';
     out.textContent = 'Selector error: ' + e.message;
+    transferNotice.style.display = 'none';
     return;
   }
 
@@ -435,10 +568,36 @@ function runCSS() {
     countEl.textContent = 'No elements matched.';
     out.className = 'output-area empty';
     out.textContent = '(no matches)';
-  } else {
-    countEl.className = 'match-count';
-    countEl.textContent = `${matches.length} element${matches.length !== 1 ? 's' : ''} matched.`;
-    out.textContent = matches.map(serializeElement).join('\n');
+    transferNotice.style.display = 'none';
+    return;
+  }
+
+  countEl.className = 'match-count';
+  countEl.textContent = matches.length + ' element' + (matches.length !== 1 ? 's' : '') + ' matched.';
+  out.textContent = matches.map(serializeElement).join('\n');
+
+  // Transfer first data-mw to jq input
+  let transferred = false;
+  for (let i = 0; i < matches.length; i++) {
+    const dataMwRaw = matches[i].getAttribute('data-mw');
+    if (dataMwRaw) {
+      try {
+        const parsed = JSON.parse(dataMwRaw);
+        document.getElementById('jq-input').value = JSON.stringify(parsed, null, 2);
+        const tag = matches[i].tagName.toLowerCase();
+        const cls = (matches[i].className || '').replace(/\bzest-highlight\b/g, '').trim().split(/\s+/)[0];
+        transferText.textContent =
+          'data-mw from <' + tag + (cls ? '.' + cls : '') + '>'
+          + ' (match ' + (i + 1) + ' of ' + matches.length + ') → JSON input';
+        transferNotice.style.display = 'flex';
+        transferred = true;
+        runJQ();
+        break;
+      } catch (_) { /* bad JSON, skip */ }
+    }
+  }
+  if (!transferred) {
+    transferNotice.style.display = 'none';
   }
 }
 
@@ -447,8 +606,9 @@ document.getElementById('css-selector').addEventListener('keydown', e => {
   if (e.key === 'Enter') runCSS();
 });
 
-// Run with default selector on load
-runCSS();
+
+// ── Auto-load on startup ───────────────────────────────────────────────
+fetchWikipedia('JSON');
 </script>
 
 </body>
