@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zest + zestjq Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.25rem;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .subtitle a { color: #0645ad; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 1200px;
+    }
+    @media (max-width: 800px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .badge {
+      font-family: monospace;
+      font-size: 0.75rem;
+      background: #e8f0fe;
+      color: #1a56db;
+      border: 1px solid #bdd0fb;
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .card-desc {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 0.5rem 0.6rem;
+      background: #fafafa;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    textarea:focus, input[type="text"]:focus {
+      border-color: #4a90d9;
+      background: #fff;
+    }
+
+    button {
+      align-self: flex-start;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #1444b3; }
+
+    .output-area {
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      padding: 0.7rem 0.8rem;
+      min-height: 120px;
+      max-height: 280px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .output-area.error { color: #f38ba8; }
+    .output-area.empty { color: #6c7086; font-style: italic; }
+
+    /* ─── Zest demo: sample DOM ─── */
+    .sample-dom {
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      padding: 0.75rem 1rem;
+      background: #fafafa;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+    .sample-dom article {
+      border-left: 3px solid #ddd;
+      padding-left: 0.75rem;
+      margin: 0.4rem 0;
+    }
+    .sample-dom .zest-highlight {
+      background: #fff3cd;
+      outline: 2px solid #f59e0b;
+      border-radius: 2px;
+    }
+    .match-count {
+      font-size: 0.8rem;
+      color: #2d6a4f;
+      font-weight: 600;
+    }
+    .match-count.none { color: #888; }
+
+    .row { display: flex; gap: 0.5rem; align-items: flex-end; }
+    .row input { flex: 1; }
+  </style>
+</head>
+<body>
+
+<h1>zest + zestjq Demo</h1>
+<p class="subtitle">
+  Client-side demos of
+  <a href="https://github.com/chjj/zest" target="_blank">zest</a> (CSS selector engine) and
+  <a href="https://www.mediawiki.org/wiki/ZestJQ" target="_blank">zestjq</a> (jq JSON-filter language).
+</p>
+
+<div class="cards">
+
+  <!-- ── ZestJQ Card ── -->
+  <div class="card">
+    <div class="card-title">
+      ZestJQ
+      <span class="badge">npm install zestjq</span>
+    </div>
+    <p class="card-desc">
+      A native TypeScript/JavaScript implementation of the
+      <a href="https://jqlang.org/" target="_blank">jq</a>
+      JSON query language — runs entirely in the browser.
+    </p>
+
+    <div>
+      <label for="jq-input">JSON Input</label>
+      <textarea id="jq-input" rows="10">{
+  "store": {
+    "book": [
+      { "category": "reference", "author": "Nigel Rees",
+        "title": "Sayings of the Century", "price": 8.95 },
+      { "category": "fiction", "author": "Evelyn Waugh",
+        "title": "Sword of Honour", "price": 12.99 },
+      { "category": "fiction", "author": "Herman Melville",
+        "title": "Moby Dick", "isbn": "0-553-21311-3", "price": 8.99 },
+      { "category": "fiction", "author": "J. R. R. Tolkien",
+        "title": "The Lord of the Rings", "isbn": "0-395-19395-8", "price": 22.99 }
+    ],
+    "bicycle": { "color": "red", "price": 19.95 }
+  }
+}</textarea>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label for="jq-filter">jq Filter</label>
+        <input type="text" id="jq-filter" value=".store.book[] | select(.price < 10)">
+      </div>
+      <button id="jq-run">Run</button>
+    </div>
+
+    <div>
+      <label>Output</label>
+      <div id="jq-output" class="output-area empty">Press Run to evaluate the filter.</div>
+    </div>
+
+    <div>
+      <label>Try these filters</label>
+      <div id="jq-examples" style="display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.8rem;">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Zest Card ── -->
+  <div class="card">
+    <div class="card-title">
+      Zest
+      <span class="badge">npm install zest</span>
+    </div>
+    <p class="card-desc">
+      A fast, lightweight CSS selector engine — an alternative to
+      <code>document.querySelectorAll</code> with support for CSS3/CSS4 selectors.
+    </p>
+
+    <div>
+      <label>Sample Document</label>
+      <div class="sample-dom" id="sample-dom">
+        <nav>
+          <a href="#" class="nav-link active">Home</a>
+          <a href="#" class="nav-link">About</a>
+          <a href="#" class="nav-link">Contact</a>
+        </nav>
+        <article class="post featured" data-id="1">
+          <h2>Introduction to CSS Selectors</h2>
+          <p class="summary">Learn how CSS selectors work.</p>
+          <ul>
+            <li class="tag">css</li>
+            <li class="tag">tutorial</li>
+          </ul>
+        </article>
+        <article class="post" data-id="2">
+          <h2>Advanced jq Queries</h2>
+          <p class="summary">Deep dive into jq filter syntax.</p>
+          <ul>
+            <li class="tag">jq</li>
+            <li class="tag">json</li>
+          </ul>
+        </article>
+        <article class="post" data-id="3">
+          <h2>JavaScript DOM APIs</h2>
+          <p class="summary">Native DOM manipulation patterns.</p>
+          <ul>
+            <li class="tag">javascript</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label for="css-selector">CSS Selector</label>
+        <input type="text" id="css-selector" value="article.post">
+      </div>
+      <button id="css-run">Find</button>
+    </div>
+
+    <div id="css-match-count" class="match-count none">Enter a selector and click Find.</div>
+
+    <div>
+      <label>Try these selectors</label>
+      <div id="css-examples" style="display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.8rem;">
+      </div>
+    </div>
+
+    <div>
+      <label>Matched Elements (serialized)</label>
+      <div id="css-output" class="output-area empty">Results will appear here.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Load the packages from node_modules (via local dev server) -->
+<script src="node_modules/zestjq/dist/browser/zestjq.iife.js"></script>
+<script src="node_modules/zest/lib/zest.js"></script>
+
+<script>
+// ── ZestJQ playground ──────────────────────────────────────────────────
+const { JQ, JQError } = ZestJQ;
+
+const jqExamples = [
+  '.store.book[].title',
+  '.store.book[] | select(.price < 10)',
+  '[.store.book[] | select(has("isbn"))]',
+  '.store.book | length',
+  '[.. | .price? // empty]',
+  '.store.book | map({title, price}) | sort_by(.price)',
+];
+
+function renderExamples(container, examples, clickFn) {
+  examples.forEach(ex => {
+    const btn = document.createElement('button');
+    btn.textContent = ex;
+    btn.style.cssText = 'background:#f0f4ff;color:#1a56db;border:1px solid #bdd0fb;font-family:monospace;font-size:0.78rem;padding:3px 8px;border-radius:4px;cursor:pointer;';
+    btn.addEventListener('click', () => clickFn(ex));
+    container.appendChild(btn);
+  });
+}
+
+renderExamples(document.getElementById('jq-examples'), jqExamples, ex => {
+  document.getElementById('jq-filter').value = ex;
+  runJQ();
+});
+
+function runJQ() {
+  const out = document.getElementById('jq-output');
+  out.className = 'output-area';
+  const raw = document.getElementById('jq-input').value.trim();
+  const filter = document.getElementById('jq-filter').value.trim();
+
+  let input;
+  try {
+    input = JSON.parse(raw);
+  } catch (e) {
+    out.className = 'output-area error';
+    out.textContent = 'JSON parse error: ' + e.message;
+    return;
+  }
+
+  try {
+    const results = [];
+    for (const val of JQ.eval(input, filter)) {
+      results.push(JSON.stringify(val, null, 2));
+    }
+    if (results.length === 0) {
+      out.className = 'output-area empty';
+      out.textContent = '(no output)';
+    } else {
+      out.textContent = results.join('\n');
+    }
+  } catch (e) {
+    out.className = 'output-area error';
+    out.textContent = (e instanceof JQError ? 'jq error: ' : 'Error: ') + e.message;
+  }
+}
+
+document.getElementById('jq-run').addEventListener('click', runJQ);
+document.getElementById('jq-filter').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runJQ();
+});
+
+// Run with default filter on load
+runJQ();
+
+
+// ── Zest CSS selector demo ─────────────────────────────────────────────
+const cssExamples = [
+  'article.post',
+  'article.featured',
+  '.tag',
+  'a.nav-link',
+  'a.nav-link.active',
+  'article[data-id="2"]',
+  'h2',
+  '.post p.summary',
+  ':first-child',
+];
+
+renderExamples(document.getElementById('css-examples'), cssExamples, ex => {
+  document.getElementById('css-selector').value = ex;
+  runCSS();
+});
+
+const sampleDom = document.getElementById('sample-dom');
+
+function clearHighlights() {
+  sampleDom.querySelectorAll('.zest-highlight').forEach(el => {
+    el.classList.remove('zest-highlight');
+  });
+}
+
+function serializeElement(el) {
+  const attrs = Array.from(el.attributes)
+    .filter(a => a.name !== 'class' || el.className.replace('zest-highlight', '').trim())
+    .map(a => {
+      const val = a.name === 'class'
+        ? a.value.replace(/\bzest-highlight\b/g, '').trim()
+        : a.value;
+      return val ? `${a.name}="${val}"` : a.name;
+    })
+    .filter(Boolean)
+    .join(' ');
+  const tag = el.tagName.toLowerCase();
+  const inner = el.textContent.trim().slice(0, 60);
+  return `<${tag}${attrs ? ' ' + attrs : ''}>${inner ? inner + (inner.length >= 60 ? '…' : '') : '…'}</${tag}>`;
+}
+
+function runCSS() {
+  clearHighlights();
+  const selector = document.getElementById('css-selector').value.trim();
+  const countEl = document.getElementById('css-match-count');
+  const out = document.getElementById('css-output');
+  out.className = 'output-area';
+
+  if (!selector) {
+    countEl.className = 'match-count none';
+    countEl.textContent = 'Enter a selector and click Find.';
+    out.className = 'output-area empty';
+    out.textContent = 'Results will appear here.';
+    return;
+  }
+
+  let matches;
+  try {
+    matches = zest(selector, sampleDom);
+  } catch (e) {
+    countEl.className = 'match-count none';
+    countEl.textContent = '';
+    out.className = 'output-area error';
+    out.textContent = 'Selector error: ' + e.message;
+    return;
+  }
+
+  matches.forEach(el => el.classList.add('zest-highlight'));
+
+  if (matches.length === 0) {
+    countEl.className = 'match-count none';
+    countEl.textContent = 'No elements matched.';
+    out.className = 'output-area empty';
+    out.textContent = '(no matches)';
+  } else {
+    countEl.className = 'match-count';
+    countEl.textContent = `${matches.length} element${matches.length !== 1 ? 's' : ''} matched.`;
+    out.textContent = matches.map(serializeElement).join('\n');
+  }
+}
+
+document.getElementById('css-run').addEventListener('click', runCSS);
+document.getElementById('css-selector').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runCSS();
+});
+
+// Run with default selector on load
+runCSS();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "zest-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "zest": "^0.1.3",
+    "zestjq": "^1.1.0"
+  }
+}
