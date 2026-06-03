@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "zest": "^0.1.3",
+    "zest": "github:cscott/zest",
     "zestjq": "^1.1.0"
   }
 }
