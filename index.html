@@ -126,7 +126,10 @@
     .output-area.error { color: #f38ba8; }
     .output-area.empty { color: #6c7086; font-style: italic; }
 
+    .left-col { display: flex; flex-direction: column; gap: 1.5rem; }
+
     /* ─── Zest demo: live Wikipedia DOM ─── */
+    .doc-card { align-self: stretch; }
     .sample-dom {
       border: 1px solid #e0e0e0;
       border-radius: 5px;
@@ -134,7 +137,7 @@
       background: #fafafa;
       font-size: 0.85rem;
       line-height: 1.8;
-      max-height: 400px;
+      flex: 1;
       overflow-y: auto;
     }
     .sample-dom .zest-highlight {
@@ -204,22 +207,80 @@
 
 <div class="cards">
 
-  <!-- ── ZestJQ Card ── -->
-  <div class="card">
-    <div class="card-title">
-      ZestJQ
-      <span class="badge">npm install zestjq</span>
-    </div>
-    <p class="card-desc">
-      A native TypeScript/JavaScript implementation of the
-      <a href="https://jqlang.org/" target="_blank">jq</a>
-      JSON query language. Run jq filters against the <code>data-mw</code>
-      attribute of any matched element — or supply your own JSON.
-    </p>
+  <div class="left-col">
 
-    <div>
-      <label for="jq-input">JSON Input</label>
-      <textarea id="jq-input" rows="10">{
+    <!-- ── Zest Controls Card ── -->
+    <div class="card">
+      <div class="card-title">
+        Zest
+        <span class="badge">github:cscott/zest</span>
+      </div>
+      <p class="card-desc">
+        A fast CSS selector engine extended with a <code>[attr/<em>jq</em>]</code> operator
+        that evaluates jq expressions against JSON-valued attributes —
+        ideal for querying <a href="https://www.mediawiki.org/wiki/Specs/HTML" target="_blank">MediaWiki Parsoid HTML</a>.
+      </p>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="wiki-title">Wikipedia Page</label>
+          <input type="text" id="wiki-title" value="JSON" placeholder="Page title">
+        </div>
+        <button id="wiki-fetch">Fetch</button>
+      </div>
+      <div id="fetch-status" class="fetch-status"></div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="css-selector">CSS Selector</label>
+          <input type="text" id="css-selector" value="[typeof~=&quot;mw:Transclusion&quot;]">
+        </div>
+        <button id="css-run">Find</button>
+      </div>
+
+      <div id="css-match-count" class="match-count none">Fetch a page and enter a selector.</div>
+
+      <div>
+        <label>Try these selectors</label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div class="example-group">
+            <div class="example-group-label">MediaWiki attributes</div>
+            <div class="example-buttons" id="css-basic-examples"></div>
+          </div>
+          <div class="example-group">
+            <div class="example-group-label">data-mw / jq (&#x2F; operator)</div>
+            <div class="example-buttons" id="css-jq-examples"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="transfer-notice" style="display:none" class="transfer-notice">
+        <span id="transfer-text"></span>
+        <button id="transfer-dismiss" title="Dismiss">&#x00D7;</button>
+      </div>
+
+      <div>
+        <label>Matched Elements (serialized)</label>
+        <div id="css-output" class="output-area empty">Results will appear here.</div>
+      </div>
+    </div>
+
+    <!-- ── ZestJQ Controls Card ── -->
+    <div class="card">
+      <div class="card-title">
+        ZestJQ
+        <span class="badge">npm install zestjq</span>
+      </div>
+      <p class="card-desc">
+        A native TypeScript/JavaScript implementation of the
+        <a href="https://jqlang.org/" target="_blank">jq</a>
+        JSON query language. Populated automatically from the
+        <code>data-mw</code> attribute of matched elements.
+      </p>
+
+      <div>
+        <label for="jq-input">JSON Input</label>
+        <textarea id="jq-input" rows="10">{
   "parts": [
     {
       "template": {
@@ -237,92 +298,37 @@
     }
   ]
 }</textarea>
-    </div>
-
-    <div class="row">
-      <div style="flex:1">
-        <label for="jq-filter">jq Filter</label>
-        <input type="text" id="jq-filter" value=".parts[].template?.target.href">
       </div>
-      <button id="jq-run">Run</button>
-    </div>
 
-    <div>
-      <label>Output</label>
-      <div id="jq-output" class="output-area empty">Press Run to evaluate the filter.</div>
-    </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="jq-filter">jq Filter</label>
+          <input type="text" id="jq-filter" value=".parts[].template?.target.href">
+        </div>
+        <button id="jq-run">Run</button>
+      </div>
 
-    <div>
-      <label>Try these filters</label>
-      <div style="display:flex; flex-direction:column; gap:8px;">
+      <div>
+        <label>Output</label>
+        <div id="jq-output" class="output-area empty">Press Run to evaluate the filter.</div>
+      </div>
+
+      <div>
+        <label>Try these filters</label>
         <div class="example-group" id="jq-mw-group">
           <div class="example-group-label">MediaWiki data-mw</div>
           <div class="example-buttons" id="jq-mw-examples"></div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ── Zest Card ── -->
-  <div class="card">
-    <div class="card-title">
-      Zest
-      <span class="badge">github:cscott/zest</span>
-    </div>
-    <p class="card-desc">
-      A fast CSS selector engine extended with a <code>[attr/<em>jq</em>]</code> operator
-      that evaluates jq expressions against JSON-valued attributes —
-      ideal for querying <a href="https://www.mediawiki.org/wiki/Specs/HTML" target="_blank">MediaWiki Parsoid HTML</a>.
-    </p>
+  </div><!-- /.left-col -->
 
-    <div class="row">
-      <div style="flex:1">
-        <label for="wiki-title">Wikipedia Page</label>
-        <input type="text" id="wiki-title" value="JSON" placeholder="Page title">
-      </div>
-      <button id="wiki-fetch">Fetch</button>
-    </div>
-    <div id="fetch-status" class="fetch-status"></div>
-
-    <div>
-      <label>Live Document</label>
-      <div class="sample-dom" id="sample-dom">
-        <em style="color:#aaa">Fetching Wikipedia article…</em>
-      </div>
-    </div>
-
-    <div class="row">
-      <div style="flex:1">
-        <label for="css-selector">CSS Selector</label>
-        <input type="text" id="css-selector" value="[typeof~=&quot;mw:Transclusion&quot;]">
-      </div>
-      <button id="css-run">Find</button>
-    </div>
-
-    <div id="css-match-count" class="match-count none">Fetch a page and enter a selector.</div>
-
-    <div>
-      <label>Try these selectors</label>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <div class="example-group">
-          <div class="example-group-label">MediaWiki attributes</div>
-          <div class="example-buttons" id="css-basic-examples"></div>
-        </div>
-        <div class="example-group">
-          <div class="example-group-label">data-mw / jq (&#x2F; operator)</div>
-          <div class="example-buttons" id="css-jq-examples"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="transfer-notice" style="display:none" class="transfer-notice">
-      <span id="transfer-text"></span>
-      <button id="transfer-dismiss" title="Dismiss">&#x00D7;</button>
-    </div>
-
-    <div>
-      <label>Matched Elements (serialized)</label>
-      <div id="css-output" class="output-area empty">Results will appear here.</div>
+  <!-- ── Live Document Card ── -->
+  <div class="card doc-card">
+    <div class="card-title">Live Document</div>
+    <div class="sample-dom" id="sample-dom">
+      <em style="color:#aaa">Fetching Wikipedia article…</em>
     </div>
   </div>
 
