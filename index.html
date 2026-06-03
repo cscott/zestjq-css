@@ -220,26 +220,29 @@
     <div>
       <label for="jq-input">JSON Input</label>
       <textarea id="jq-input" rows="10">{
-  "store": {
-    "book": [
-      { "category": "reference", "author": "Nigel Rees",
-        "title": "Sayings of the Century", "price": 8.95 },
-      { "category": "fiction", "author": "Evelyn Waugh",
-        "title": "Sword of Honour", "price": 12.99 },
-      { "category": "fiction", "author": "Herman Melville",
-        "title": "Moby Dick", "isbn": "0-553-21311-3", "price": 8.99 },
-      { "category": "fiction", "author": "J. R. R. Tolkien",
-        "title": "The Lord of the Rings", "isbn": "0-395-19395-8", "price": 22.99 }
-    ],
-    "bicycle": { "color": "red", "price": 19.95 }
-  }
+  "parts": [
+    {
+      "template": {
+        "target": {
+          "wt": "short description",
+          "href": "./Template:Short_description"
+        },
+        "params": {
+          "1": {
+            "wt": "Open standard file format and data interchange"
+          }
+        },
+        "i": 0
+      }
+    }
+  ]
 }</textarea>
     </div>
 
     <div class="row">
       <div style="flex:1">
         <label for="jq-filter">jq Filter</label>
-        <input type="text" id="jq-filter" value=".store.book[] | select(.price < 10)">
+        <input type="text" id="jq-filter" value=".parts[].template?.target.href">
       </div>
       <button id="jq-run">Run</button>
     </div>
@@ -253,12 +256,8 @@
       <label>Try these filters</label>
       <div style="display:flex; flex-direction:column; gap:8px;">
         <div class="example-group" id="jq-mw-group">
-          <div class="example-group-label">MediaWiki data-mw (after match)</div>
+          <div class="example-group-label">MediaWiki data-mw</div>
           <div class="example-buttons" id="jq-mw-examples"></div>
-        </div>
-        <div class="example-group">
-          <div class="example-group-label">Bookstore (default)</div>
-          <div class="example-buttons" id="jq-examples"></div>
         </div>
       </div>
     </div>
@@ -363,20 +362,7 @@ const jqMwExamples = [
   '.parts[] | select(.parserfunction?)',
 ];
 
-const jqBookstoreExamples = [
-  '.store.book[].title',
-  '.store.book[] | select(.price < 10)',
-  '[.store.book[] | select(has("isbn"))]',
-  '.store.book | length',
-  '[.. | .price? // empty]',
-  '.store.book | map({title, price}) | sort_by(.price)',
-];
-
 renderExamples(document.getElementById('jq-mw-examples'), jqMwExamples, ex => {
-  document.getElementById('jq-filter').value = ex;
-  runJQ();
-});
-renderExamples(document.getElementById('jq-examples'), jqBookstoreExamples, ex => {
   document.getElementById('jq-filter').value = ex;
   runJQ();
 });
@@ -452,7 +438,7 @@ async function fetchWikipedia(title) {
     const transclusions = zest('[typeof~="mw:Transclusion"]', sampleDom);
     const kb = (new Blob([data.parse.text]).size / 1024).toFixed(0);
     fetchStatus.textContent =
-      'Fetched ⟦⟦' + data.parse.title + '⟧⟧' +
+      'Fetched [[' + data.parse.title + ']]' +
       ' (' + kb + ' kB, ' + transclusions.length +
       ' transclusion' + (transclusions.length !== 1 ? 's' : '') + ')';
 
