@@ -586,6 +586,9 @@ function runCSS() {
   countEl.textContent = matches.length + ' element' + (matches.length !== 1 ? 's' : '') + ' matched.';
   out.textContent = matches.map(serializeElement).join('\n');
 
+  // Scroll the live document to the first match
+  matches[0].scrollIntoView({ block: 'nearest' });
+
   // Transfer first data-mw to jq input
   let transferred = false;
   for (let i = 0; i < matches.length; i++) {
