@@ -236,7 +236,7 @@
           <a href="#" class="nav-link">About</a>
           <a href="#" class="nav-link">Contact</a>
         </nav>
-        <article class="post featured" data-id="1">
+        <article class="post featured" data-id="1" data-mw='{"a":2}'>
           <h2>Introduction to CSS Selectors</h2>
           <p class="summary">Learn how CSS selectors work.</p>
           <ul>
@@ -265,7 +265,7 @@
     <div class="row">
       <div style="flex:1">
         <label for="css-selector">CSS Selector</label>
-        <input type="text" id="css-selector" value="article.post">
+        <input type="text" id="css-selector" value="[data-mw/.a < 3]">
       </div>
       <button id="css-run">Find</button>
     </div>
@@ -289,6 +289,7 @@
 <!-- Load the packages from node_modules (via local dev server) -->
 <script src="node_modules/zestjq/dist/browser/zestjq.iife.js"></script>
 <script src="node_modules/zest/lib/zest.js"></script>
+<script src="zestjq.js"></script>
 
 <script>
 // ── ZestJQ playground ──────────────────────────────────────────────────
