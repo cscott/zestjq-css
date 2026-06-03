@@ -476,6 +476,16 @@ document.getElementById('wiki-title').addEventListener('keydown', e => {
   if (e.key === 'Enter') fetchBtn.click();
 });
 
+sampleDom.addEventListener('click', e => {
+  const link = e.target.closest('a[rel~="mw:WikiLink"]');
+  if (!link) return;
+  e.preventDefault();
+  const title = link.getAttribute('title');
+  if (!title) return;
+  document.getElementById('wiki-title').value = title;
+  fetchWikipedia(title);
+});
+
 
 // ── Zest CSS selector demo ─────────────────────────────────────────────
 const cssBasicExamples = [
