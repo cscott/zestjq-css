@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "description": "CSS selector engine with jq JSON-attribute operator, ideal for querying MediaWiki HTML",
   "type": "module",
-  "main": "dist/zest-jq.iife.js",
   "module": "dist/zest-jq.esm.js",
   "exports": {
     ".": {
       "import": "./dist/zest-jq.esm.js",
       "default": "./dist/zest-jq.iife.js"
     }
+  },
+  "engines": {
+    "node": ">=20.6"
   },
   "files": [
     "dist/",
@@ -27,19 +29,25 @@
   ],
   "author": "C. Scott Ananian <cscott@cscott.net> (https://cscott.net)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cscott/zestjq-css.git"
+  },
+  "homepage": "https://github.com/cscott/zestjq-css#readme",
+  "bugs": {
+    "url": "https://github.com/cscott/zestjq-css/issues"
+  },
   "scripts": {
     "build": "rollup -c",
     "start": "python3 -m http.server 8080",
     "test": "node --test --import ./test/setup.js test/ZestJQTest.js"
   },
-  "dependencies": {
-    "zest": "github:cscott/zest",
-    "zestjq": "^1.1.0"
-  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "domino": "^2.1.7",
-    "rollup": "^4.61.0"
+    "rollup": "^4.61.0",
+    "zest": "github:cscott/zest",
+    "zestjq": "^1.1.0"
   }
 }
