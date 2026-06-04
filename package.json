@@ -1,17 +1,37 @@
 {
-  "name": "zest-demo",
+  "name": "zestjq-css",
   "version": "1.0.0",
-  "description": "",
+  "description": "CSS selector engine with jq JSON-attribute operator, ideal for querying MediaWiki HTML",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/zest-jq.iife.js",
+  "module": "dist/zest-jq.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/zest-jq.esm.js",
+      "default": "./dist/zest-jq.iife.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "keywords": [
+    "css",
+    "selector",
+    "jq",
+    "json",
+    "mediawiki",
+    "wikipedia",
+    "parsoid",
+    "data-mw"
+  ],
+  "author": "C. Scott Ananian <cscott@cscott.net> (https://cscott.net)",
+  "license": "MIT",
   "scripts": {
     "build": "rollup -c",
     "start": "python3 -m http.server 8080",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "zest": "github:cscott/zest",
     "zestjq": "^1.1.0"
