@@ -10726,8 +10726,8 @@ function formatUnixTimestampSeconds(d) {
 
 var locale;
 var timeFormat;
-var timeParse;
 var utcFormat;
+var utcParse;
 
 defaultLocale({
   dateTime: "%x, %X",
@@ -10743,9 +10743,9 @@ defaultLocale({
 function defaultLocale(definition) {
   locale = formatLocale(definition);
   timeFormat = locale.format;
-  timeParse = locale.parse;
+  locale.parse;
   utcFormat = locale.utcFormat;
-  locale.utcParse;
+  utcParse = locale.utcParse;
   return locale;
 }
 
@@ -11425,7 +11425,7 @@ class JQTopLevelEnv extends JQEnv {
             return function* (input, env) {
                 for (const fmtVal of fmtFn(input, env)) {
                     const [str, fmt] = checkStrings('strptime/1', input, fmtVal);
-                    const parser = timeParse(fmt);
+                    const parser = utcParse(fmt);
                     const d = parser(str);
                     if (d === null) {
                         throw new JQError('Bad date');
