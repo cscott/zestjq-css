@@ -481,14 +481,16 @@ const cssBasicExamples = [
   '[data-mw]',
   '[typeof~="mw:Transclusion"]',
   '[typeof~="mw:Entity"]',
+  '[typeof~="mw:Extension/syntaxhighlight"]',
   'a[rel~="mw:WikiLink"]',
 ];
 
 const cssJqExamples = [
   '[data-mw/.parts[].template?]',
-  '[data-mw/.parts[].parserfunction?]',
-  '[data-mw/.parts | length > 1]',
   '[data-mw/.parts[].template?.target.href == "./Template:Citation_needed"]',
+  '[typeof*="mw:Extension/"][data-mw/.name == "indicator"]',
+  '[typeof="mw:Extension/templatestyles"][data-mw/.attrs.src != "Mono/styles.css"]',
+  '[data-mw/.parts | length > 1]',
 ];
 
 renderExamples(document.getElementById('css-basic-examples'), cssBasicExamples, ex => {
