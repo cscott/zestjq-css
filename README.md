@@ -17,6 +17,11 @@ The `/` attribute operator extends CSS selectors to test JSON-valued HTML attrib
 [data-mw/.parts[].template?.params.date.wt == "March 2026"]
 ```
 
+There's a PHP implementation of this same idea in the
+[wikimedia/zest-css](https://packagist.org/packages/wikimedia/zest-css)
+package; see the [JSON-valued attribute operators](https://github.com/wikimedia/mediawiki-libs-Zest#extension-json-valued-attribute-operators)
+section in its README.
+
 ## Install
 
 ```bash
