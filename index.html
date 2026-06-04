@@ -129,7 +129,7 @@
     .left-col { display: flex; flex-direction: column; gap: 1.5rem; }
 
     /* ─── Zest demo: live Wikipedia DOM ─── */
-    .doc-card { align-self: stretch; }
+    .doc-card { align-self: flex-start; overflow: hidden; }
     .sample-dom {
       border: 1px solid #e0e0e0;
       border-radius: 5px;
@@ -139,6 +139,7 @@
       line-height: 1.8;
       flex: 1;
       overflow-y: auto;
+      min-height: 0;
     }
     .sample-dom .zest-highlight {
       background: #fff3cd;
@@ -428,6 +429,7 @@ async function fetchWikipedia(title) {
 
   try {
     const url = 'https://en.wikipedia.org/w/api.php?action=parse&format=json&origin=*' +
+      '&redirects=1' +
       '&page=' + encodeURIComponent(title) + '&parser=parsoid&formatversion=2';
     const resp = await fetch(url);
     const data = await resp.json();
@@ -618,6 +620,14 @@ document.getElementById('css-selector').addEventListener('keydown', e => {
 
 // ── Auto-load on startup ───────────────────────────────────────────────
 fetchWikipedia('JSON');
+
+// ── Match doc-card height to left column ──────────────────────────────
+const leftCol = document.querySelector('.left-col');
+const docCard = document.querySelector('.doc-card');
+const ro = new ResizeObserver(() => {
+	docCard.style.maxHeight = leftCol.offsetHeight + 'px';
+});
+ro.observe(leftCol);
 </script>
 
 </body>
