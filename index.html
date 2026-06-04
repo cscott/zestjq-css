@@ -189,10 +189,11 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .example-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .example-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: flex-start; align-items: flex-start; }
 
     .row { display: flex; gap: 0.5rem; align-items: flex-end; }
-    .row input { flex: 1; }
+    .row input { flex: 1; height: 2.25rem; }
+    .row button { align-self: flex-end; height: 2.25rem; padding-top: 0; padding-bottom: 0; }
   </style>
 </head>
 <body>
@@ -344,7 +345,7 @@
 function makeExampleButton(label) {
   const btn = document.createElement('button');
   btn.textContent = label;
-  btn.style.cssText = 'background:#f0f4ff;color:#1a56db;border:1px solid #bdd0fb;font-family:monospace;font-size:0.78rem;padding:3px 8px;border-radius:4px;cursor:pointer;align-self:auto;';
+  btn.style.cssText = 'background:#f0f4ff;color:#1a56db;border:1px solid #bdd0fb;font-family:monospace;font-size:0.78rem;padding:3px 8px;border-radius:4px;cursor:pointer;align-self:flex-start;text-align:left;';
   return btn;
 }
 
