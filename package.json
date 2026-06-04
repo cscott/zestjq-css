@@ -2,8 +2,10 @@
   "name": "zest-demo",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
+    "build": "rollup -c",
     "start": "python3 -m http.server 8080",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,5 +15,10 @@
   "dependencies": {
     "zest": "github:cscott/zest",
     "zestjq": "^1.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "rollup": "^4.61.0"
   }
 }

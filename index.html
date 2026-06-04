@@ -334,10 +334,7 @@
 
 </div>
 
-<!-- Load the packages from node_modules (via local dev server) -->
-<script src="node_modules/zestjq/dist/browser/zestjq.iife.js"></script>
-<script src="node_modules/zest/lib/zest.js"></script>
-<script src="zestjq.js"></script>
+<script src="dist/zest-jq.iife.js"></script>
 
 <script>
 // ── Shared helper ──────────────────────────────────────────────────────
@@ -359,7 +356,7 @@ function renderExamples(container, examples, clickFn) {
 
 
 // ── ZestJQ playground ──────────────────────────────────────────────────
-const { JQ, JQError } = ZestJQ;
+const { zest, JQ, JQError } = ZestJQ;
 
 const jqMwExamples = [
   '.parts[].template?.target.href',

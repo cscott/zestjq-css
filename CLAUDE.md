@@ -24,24 +24,37 @@ The demo is a single static page (`index.html`) plus a small integration shim (`
 | `node_modules/zest/lib/zest.js` | CSS selector engine (from `github:cscott/zest`) |
 | `node_modules/zestjq/dist/browser/zestjq.iife.js` | jq implementation; exposes `window.ZestJQ` |
 
-### Script load order in index.html
+### Build
+
+```bash
+npm run build   # rollup -c → dist/zest-jq.esm.js + dist/zest-jq.iife.js
+```
+
+`src/index.js` is the entry point. It imports `zest` (CommonJS, via `@rollup/plugin-commonjs`) and `zestjq` (ESM), registers the `/` operator, and re-exports `{ zest, JQ, JQError, JQUtils }`. Rollup produces two outputs in `dist/`:
+
+| File | Format | Use |
+|------|--------|-----|
+| `dist/zest-jq.iife.js` | IIFE | `<script src>` — exposes `window.ZestJQ` |
+| `dist/zest-jq.esm.js` | ESM | `import` — for npm / `<script type="module">` |
+
+Both files are committed to git so GitHub Pages can serve them without a CI build step. Re-run `npm run build` after updating either dependency.
+
+### Script load in index.html
 
 ```html
-<script src="node_modules/zestjq/dist/browser/zestjq.iife.js"></script>  <!-- window.ZestJQ -->
-<script src="node_modules/zest/lib/zest.js"></script>                    <!-- window.zest -->
-<script src="zestjq.js"></script>                                         <!-- integration shim -->
-<script> /* page logic */ </script>
+<script src="dist/zest-jq.iife.js"></script>  <!-- window.ZestJQ = { zest, JQ, JQError, JQUtils } -->
+<script> const { zest, JQ, JQError } = ZestJQ; /* page logic */ </script>
 ```
 
 ### The `/` attribute operator (key integration point)
 
-`zestjq.js` registers a custom operator on `zest.operators['/']`. This lets CSS selectors test JSON-valued HTML attributes using jq syntax:
+`src/index.js` registers a custom operator on `zest.operators['/']`. This lets CSS selectors test JSON-valued HTML attributes using jq syntax:
 
 ```css
 [data-mw/.parts[].template?.target.href == "./Template:Citation_needed"]
 ```
 
-The operator parses the attribute value as JSON, runs the jq expression against it via `ZestJQ.JQ.compile()`, and returns true if the first output value is truthy. Results are cached by jq expression in `ZestJQ.Cache`.
+The operator parses the attribute value as JSON, runs the jq expression against it via `JQ.compile()`, and returns true if the first output value is truthy. Results are cached by jq expression in a module-level `Map`.
 
 The `cscott/zest` fork (vs. the npm `zest` package) is required because it exposes `zest.operators` for extension.
 
